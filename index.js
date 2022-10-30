@@ -11,7 +11,7 @@ app.use(express.json());
 //password:Z4c7Z1pxobVDzUQP
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://dbUser1:P1GCRC6Y3K2W5Mwo@cluster0.mordayw.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -19,11 +19,25 @@ async function run() {
     try {
         const userCollection = client.db("nodeMongoCrud").collection("users");
 
+        app.get('/users', async (req, res) => {
+            const query = {}
+            const cursor = userCollection.find(query);
+            const users = await cursor.toArray();
+            res.send(users);
+        })
+
         app.post('/users', async (req, res) => {
             const user = req.body;
             console.log(user)
 
             const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await userCollection.deleteOne(query)
             res.send(result);
         })
 
